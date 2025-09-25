@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a class="btn btn-outline-primary" href="{{ url_for('case_list', date_str=prev_date) }}">← Previous Day</a>
+  <h4>{{ current_date }}</h4>
+  <a class="btn btn-outline-primary" href="{{ url_for('case_list', date_str=next_date) }}">Next Day →</a>
+</div>
+
+{% if current_date == today %}
+  <form method="post" action="{{ url_for('new_case') }}" class="d-flex mb-3">
+    <input type="text" name="patient_name" placeholder="Enter patient name" class="form-control me-2" required>
+    <button type="submit" class="btn btn-primary">➕ New Case</button>
+  </form>
+{% endif %}
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Case ID</th>
+      <th>Patient Name</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for case in cases %}
+      <tr>
+        <td>{{ case.id }}</td>
+        <td>{{ case.patient_name }}</td>
+        <td>
+          <a href="{{ url_for('case_view', case_id=case.id) }}" class="btn btn-sm btn-primary">
+            View / Edit
+          </a>
+        </td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="3" class="text-center">No cases for this date.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

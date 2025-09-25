@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Case: {{ case.patient_name }}</h2>
+
+  <form method="post" id="case-form">
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Label</th>
+          <th scope="col">Time</th>
+          <th scope="col">Mark Now</th>
+          <th scope="col">Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for label, field_name in fields %}
+          {% set value = getattr(case, field_name) %}
+          {% set reason_value = getattr(case, field_name + '_reason') %}
+          <tr>
+            <!-- Label -->
+            <td><strong>{{ label }}</strong></td>
+
+            <!-- Time input -->
+            <td>
+              <input type="time" class="form-control step-field"
+                     id="time_{{ field_name }}"
+                     name="time_{{ field_name }}"
+                     value="{{ value.strftime('%H:%M') if value else '' }}"
+                     data-field="{{ field_name }}">
+            </td>
+
+            <!-- Mark now button -->
+            <td>
+              <button type="submit" class="btn btn-primary mark-now-btn step-field"
+                      data-field="{{ field_name }}">
+                Mark Now
+              </button>
+            </td>
+
+            <!-- Delay reason -->
+            <td>
+              <select class="form-select reason-select"
+                      id="reason_{{ field_name }}"
+                      name="reason_{{ field_name }}">
+                <option value="" {% if not reason_value %}selected{% endif %}>—</option>
+                <option value="Staff" {% if reason_value=='Staff' %}selected{% endif %}>Staff</option>
+                <option value="Equipment" {% if reason_value=='Equipment' %}selected{% endif %}>Equipment</option>
+                <option value="Process" {% if reason_value=='Process' %}selected{% endif %}>Process</option>
+                <option value="Other" {% if reason_value=='Other' %}selected{% endif %}>Other</option>
+              </select>
+
+              <input type="text" class="form-control mt-1 reason-text"
+                     id="reason_text_{{ field_name }}"
+                     name="reason_text_{{ field_name }}"
+                     placeholder="Explain delay..."
+                     value="{{ getattr(case, field_name + '_reason_text', '') }}"
+                     {% if not reason_value %}disabled{% endif %}>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="mt-3">
+      <button type="submit" class="btn btn-success">Save All</button>
+    </div>
+  </form>
+</div>
+
+<!-- JS for Mark Now + Progressive Unlock -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("case-form");
+
+  const order = [
+    "pushed_in", "anaesthesia_start", "surgical_prep",
+    "surgical_start", "surgical_finish",
+    "anaesthesia_finish", "pushed_out"
+  ];
+
+  // Function to update which fields are enabled
+  function updateEnabledFields() {
+    let unlockNext = true;
+    for (let field of order) {
+      const timeInput = document.getElementById(`time_${field}`);
+      const button = document.querySelector(`button[data-field="${field}"]`);
+      const reasonSelect = document.getElementById(`reason_${field}`);
+
+      if (unlockNext) {
+        timeInput.removeAttribute("disabled");
+        if (button) button.removeAttribute("disabled");
+        if (reasonSelect) reasonSelect.removeAttribute("disabled");
+      } else {
+        timeInput.setAttribute("disabled", "true");
+        if (button) button.setAttribute("disabled", "true");
+        if (reasonSelect) reasonSelect.setAttribute("disabled", "true");
+      }
+
+      if (timeInput.value) {
+        unlockNext = true; // keep moving forward
+      } else {
+        unlockNext = false; // stop at first missing time
+      }
+    }
+  }
+
+  // Mark Now buttons: fill in current time & submit
+  document.querySelectorAll(".mark-now-btn").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const currentTime = `${hh}:${mm}`;
+
+      const field = this.dataset.field;
+      const input = document.getElementById(`time_${field}`);
+      if (input) {
+        input.value = currentTime;
+      }
+
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "action";
+      hidden.value = field;
+      form.appendChild(hidden);
+
+      form.submit();
+    });
+  });
+
+
+  // Enable/disable reason text depending on dropdown
+  document.querySelectorAll(".reason-select").forEach(select => {
+    select.addEventListener("change", function() {
+      const field = this.id.replace("reason_", "");
+      const textBox = document.getElementById(`reason_text_${field}`);
+      if (this.value) {
+        textBox.removeAttribute("disabled");
+      } else {
+        textBox.setAttribute("disabled", "true");
+        textBox.value = "";
+      }
+    });
+  });
+
+  // Run checks initially and on changes
+  updateEnabledFields();
+  document.querySelectorAll("input[type='time']").forEach(input => {
+    input.addEventListener("input", updateEnabledFields);
+  });
+});
+</script>
+{% endblock %}

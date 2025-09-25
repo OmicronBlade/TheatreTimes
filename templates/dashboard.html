@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Theatre Dashboard</h2>
+
+  <h4>Daily ({{ daily_intervals|length }} cases)</h4>
+  <table class="table table-bordered table-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Patient</th>
+        <th>Pushed In → Anaesthesia (min)</th>
+        <th>Anaesthesia → Surgical Start (min)</th>
+        <th>Surgical Duration (min)</th>
+        <th>Surgical Finish → Anaesthesia Finish (min)</th>
+        <th>Anaesthesia Finish → Pushed Out (min)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in daily_intervals %}
+      <tr>
+        <td>{{ row.patient }}</td>
+        <td>{{ row.pushed_in_to_anaesthesia or '-' }}</td>
+        <td>{{ row.anaesthesia_to_surgical_start or '-' }}</td>
+        <td>{{ row.surgical_duration or '-' }}</td>
+        <td>{{ row.surgical_finish_to_anaesthesia_finish or '-' }}</td>
+        <td>{{ row.anaesthesia_finish_to_pushed_out or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h4>Weekly ({{ weekly_intervals|length }} cases)</h4>
+  <table class="table table-bordered table-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Patient</th>
+        <th>Pushed In → Anaesthesia (min)</th>
+        <th>Anaesthesia → Surgical Start (min)</th>
+        <th>Surgical Duration (min)</th>
+        <th>Surgical Finish → Anaesthesia Finish (min)</th>
+        <th>Anaesthesia Finish → Pushed Out (min)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in weekly_intervals %}
+      <tr>
+        <td>{{ row.patient }}</td>
+        <td>{{ row.pushed_in_to_anaesthesia or '-' }}</td>
+        <td>{{ row.anaesthesia_to_surgical_start or '-' }}</td>
+        <td>{{ row.surgical_duration or '-' }}</td>
+        <td>{{ row.surgical_finish_to_anaesthesia_finish or '-' }}</td>
+        <td>{{ row.anaesthesia_finish_to_pushed_out or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h4>Monthly ({{ monthly_intervals|length }} cases)</h4>
+  <table class="table table-bordered table-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Patient</th>
+        <th>Pushed In → Anaesthesia (min)</th>
+        <th>Anaesthesia → Surgical Start (min)</th>
+        <th>Surgical Duration (min)</th>
+        <th>Surgical Finish → Anaesthesia Finish (min)</th>
+        <th>Anaesthesia Finish → Pushed Out (min)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in monthly_intervals %}
+      <tr>
+        <td>{{ row.patient }}</td>
+        <td>{{ row.pushed_in_to_anaesthesia or '-' }}</td>
+        <td>{{ row.anaesthesia_to_surgical_start or '-' }}</td>
+        <td>{{ row.surgical_duration or '-' }}</td>
+        <td>{{ row.surgical_finish_to_anaesthesia_finish or '-' }}</td>
+        <td>{{ row.anaesthesia_finish_to_pushed_out or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<hr>
+<h4>Daily Delay Reasons</h4>
+{% if daily_reasons %}
+  {% for reason, entries in daily_reasons.items() %}
+    <h6>{{ reason }} ({{ entries|length }})</h6>
+    <ul>
+      {% for entry in entries %}
+        <li>{{ entry }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% else %}
+  <p>No delays recorded today.</p>
+{% endif %}
+
+<hr>
+<h4>Weekly Delay Reasons</h4>
+{% if weekly_reasons %}
+  {% for reason, entries in weekly_reasons.items() %}
+    <h6>{{ reason }} ({{ entries|length }})</h6>
+    <ul>
+      {% for entry in entries %}
+        <li>{{ entry }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% else %}
+  <p>No delays recorded this week.</p>
+{% endif %}
+
+<hr>
+<h4>Monthly Delay Reasons</h4>
+{% if monthly_reasons %}
+  {% for reason, entries in monthly_reasons.items() %}
+    <h6>{{ reason }} ({{ entries|length }})</h6>
+    <ul>
+      {% for entry in entries %}
+        <li>{{ entry }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% else %}
+  <p>No delays recorded this month.</p>
+{% endif %}
+
+{% endblock %}

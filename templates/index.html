@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-3">
+  <form method="post" action="{{ url_for('new_case') }}" class="d-flex mb-3">
+    <input type="text" name="patient_name" placeholder="Enter patient name" class="form-control me-2" required>
+    <button type="submit" class="btn btn-primary">➕ New Case</button>
+  </form>
+
+  <h4>Current Cases</h4>
+  <ul class="list-group">
+    {% for case in cases %}
+      <li class="list-group-item">
+        <a href="{{ url_for('case_view', case_id=case.id) }}">
+          Case {{ case.id }} – {{ case.patient_name }}
+        </a>
+      </li>
+    {% else %}
+      <li class="list-group-item">No cases yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
